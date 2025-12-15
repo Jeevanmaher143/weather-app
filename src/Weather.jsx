@@ -1,98 +1,107 @@
 import TextField from "@mui/material/TextField";
 import Button from "@mui/material/Button";
-import SendIcon from "@mui/icons-material/Send";
 import SearchIcon from "@mui/icons-material/Search";
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import Alert from "@mui/material/Alert";
 import Paper from "@mui/material/Paper";
-import { useState } from "react";
+import CircularProgress from "@mui/material/CircularProgress";
+import { useState, useEffect } from "react";
 
 export default function Weather({ updateInfo }) {
   const [city, setCity] = useState("");
+  const [searchCity, setSearchCity] = useState("");
   const [error, setError] = useState(false);
   const [loading, setLoading] = useState(false);
 
   const API_URL = "https://api.openweathermap.org/data/2.5/weather";
   const API_KEY = "5761a19a2960dbeb163c896f7e1b5ddc";
 
-  const getWeatherInfo = async () => {
-    if (!city) {
-      alert("Please enter a city name!");
-      return null;
-    }
+  useEffect(() => {
+    if (!searchCity) return;
 
-    setLoading(true);
-    try {
-      const response = await fetch(
-        `${API_URL}?q=${city}&appid=${API_KEY}&units=metric`
-      );
+    const getWeatherInfo = async () => {
+      setLoading(true);
+      setError(false);
 
-      if (!response.ok) {
+      try {
+        const response = await fetch(
+          `${API_URL}?q=${searchCity}&appid=${API_KEY}&units=metric`
+        );
+
+        if (!response.ok) {
+          setError(true);
+          setLoading(false);
+          return;
+        }
+
+        const jsonResponse = await response.json();
+
+        const result = {
+          city: jsonResponse.name,
+          temp: jsonResponse.main.temp,
+          tempMin: jsonResponse.main.temp_min,
+          tempMax: jsonResponse.main.temp_max,
+          humidity: jsonResponse.main.humidity,
+          feels_like: jsonResponse.main.feels_like,
+          weather: jsonResponse.weather[0].description,
+          windSpeed: jsonResponse.wind.speed,
+          pressure: jsonResponse.main.pressure,
+          visibility: (jsonResponse.visibility / 1000).toFixed(1),
+        };
+
+        updateInfo(result);
+        setLoading(false);
+      } catch (err) {
+        console.error(err);
         setError(true);
         setLoading(false);
-        return null;
       }
+    };
 
-      const jsonResponse = await response.json();
+    getWeatherInfo();
+  }, [searchCity]);
 
-      const result = {
-        city: jsonResponse.name,
-        temp: jsonResponse.main.temp,
-        tempMin: jsonResponse.main.temp_min,
-        tempMax: jsonResponse.main.temp_max,
-        humidity: jsonResponse.main.humidity,
-        feels_like: jsonResponse.main.feels_like,
-        weather: jsonResponse.weather[0].description,
-        windSpeed: jsonResponse.wind.speed,
-        pressure: jsonResponse.main.pressure,
-        visibility: (jsonResponse.visibility / 1000).toFixed(1),
-      };
-
-      setError(false);
-      setLoading(false);
-      return result;
-    } catch (err) {
-      console.error(err);
-      setError(true);
-      setLoading(false);
-      return null;
+  const handleSubmit = () => {
+    if (!city.trim()) {
+      alert("Please enter a city name!");
+      return;
     }
+    setSearchCity(city.trim());
+    setCity("");
   };
 
   const handleChange = (event) => {
     setCity(event.target.value);
-    if (error) setError(false); // Clear error when user starts typing
+    if (error) setError(false);
   };
 
-  const handleSubmit = async (event) => {
-    event.preventDefault();
-    const info = await getWeatherInfo();
-    if (info) updateInfo(info);
-    setCity("");
+  const handleKeyPress = (event) => {
+    if (event.key === "Enter") {
+      handleSubmit();
+    }
   };
 
   return (
     <Box
       sx={{
         minHeight: "100vh",
-        background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
+        background: "#f5f7fa",
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
-        padding: { xs: 2, sm: 3, md: 4 },
+        padding: { xs: 2, sm: 3 },
       }}
     >
       <Paper
-        elevation={24}
+        elevation={0}
         sx={{
           padding: { xs: 3, sm: 4, md: 5 },
-          borderRadius: 4,
-          maxWidth: 500,
+          borderRadius: 3,
+          maxWidth: 480,
           width: "100%",
-          background: "rgba(255, 255, 255, 0.95)",
-          backdropFilter: "blur(10px)",
-          boxShadow: "0 20px 60px rgba(0,0,0,0.3)",
+          border: "1px solid #e0e0e0",
+          backgroundColor: "#ffffff",
         }}
       >
         {/* Header */}
@@ -102,107 +111,86 @@ export default function Weather({ updateInfo }) {
               display: "inline-flex",
               alignItems: "center",
               justifyContent: "center",
-              width: 80,
-              height: 80,
-              borderRadius: "50%",
-              background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
+              width: 64,
+              height: 64,
+              borderRadius: 2,
+              backgroundColor: "#3b82f6",
               mb: 2,
-              boxShadow: "0 8px 24px rgba(102, 126, 234, 0.4)",
             }}
           >
-            <SearchIcon sx={{ fontSize: 40, color: "white" }} />
+            <SearchIcon sx={{ fontSize: 32, color: "white" }} />
           </Box>
           <Typography
-            variant="h3"
+            variant="h4"
             sx={{
-              fontWeight: "bold",
-              background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
-              backgroundClip: "text",
-              WebkitBackgroundClip: "text",
-              WebkitTextFillColor: "transparent",
+              fontWeight: 600,
+              color: "#1e293b",
               mb: 1,
             }}
           >
-            Weather Finder
+            Weather Search
           </Typography>
-          <Typography variant="body1" sx={{ color: "#666" }}>
-            🌍 Discover weather conditions worldwide
+          <Typography variant="body2" sx={{ color: "#64748b" }}>
+            Get real-time weather information for any city
           </Typography>
         </Box>
 
-        {/* Search Form */}
-        <form onSubmit={handleSubmit}>
-          <Box sx={{ mb: 3 }}>
-            <TextField
-              id="city"
-              label="Enter City Name"
-              variant="outlined"
-              fullWidth
-              value={city}
-              onChange={handleChange}
-              placeholder="e.g., Mumbai, London, Tokyo"
-              sx={{
-                "& .MuiOutlinedInput-root": {
-                  borderRadius: 2,
-                  backgroundColor: "#f8f9fa",
-                  "&:hover": {
-                    backgroundColor: "#fff",
-                  },
-                  "&.Mui-focused": {
-                    backgroundColor: "#fff",
-                  },
-                  "& fieldset": {
-                    borderWidth: 2,
-                    borderColor: "#e0e0e0",
-                  },
-                  "&:hover fieldset": {
-                    borderColor: "#667eea",
-                  },
-                  "&.Mui-focused fieldset": {
-                    borderColor: "#667eea",
-                  },
-                },
-                "& .MuiInputLabel-root": {
-                  fontWeight: 500,
-                  "&.Mui-focused": {
-                    color: "#667eea",
-                  },
-                },
-              }}
-            />
-          </Box>
-
-          <Button
-            type="submit"
-            variant="contained"
+        {/* Search Input */}
+        <Box sx={{ mb: 2 }}>
+          <TextField
+            id="city"
+            label="City Name"
+            variant="outlined"
             fullWidth
-            endIcon={loading ? null : <SendIcon />}
+            value={city}
+            onChange={handleChange}
+            onKeyPress={handleKeyPress}
+            placeholder="e.g., Mumbai, London, Tokyo"
             disabled={loading}
             sx={{
-              padding: "14px",
-              borderRadius: 2,
-              fontSize: "1.1rem",
-              fontWeight: "bold",
-              textTransform: "none",
-              background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
-              boxShadow: "0 8px 24px rgba(102, 126, 234, 0.4)",
-              transition: "all 0.3s ease",
-              "&:hover": {
-                background: "linear-gradient(135deg, #5568d3 0%, #6a4193 100%)",
-                transform: "translateY(-2px)",
-                boxShadow: "0 12px 32px rgba(102, 126, 234, 0.5)",
+              "& .MuiOutlinedInput-root": {
+                borderRadius: 2,
+                "&:hover fieldset": {
+                  borderColor: "#3b82f6",
+                },
+                "&.Mui-focused fieldset": {
+                  borderColor: "#3b82f6",
+                  borderWidth: 2,
+                },
               },
-              "&:active": {
-                transform: "translateY(0)",
-              },
-              "&:disabled": {
-                background: "#ccc",
+              "& .MuiInputLabel-root.Mui-focused": {
+                color: "#3b82f6",
               },
             }}
-          >
-            {loading ? "Searching..." : "Get Weather"}
-          </Button>
-        </form>
+          />
+        </Box>
+
+        <Button
+          onClick={handleSubmit}
+          variant="contained"
+          fullWidth
+          startIcon={loading ? <CircularProgress size={20} color="inherit" /> : <SearchIcon />}
+          disabled={loading}
+          sx={{
+            padding: "12px",
+            borderRadius: 2,
+            fontSize: "1rem",
+            fontWeight: 600,
+            textTransform: "none",
+            backgroundColor: "#3b82f6",
+            boxShadow: "none",
+            "&:hover": {
+              backgroundColor: "#2563eb",
+              boxShadow: "none",
+            },
+            "&:disabled": {
+              backgroundColor: "#cbd5e1",
+              color: "#ffffff",
+            },
+          }}
+        >
+          {loading ? "Searching..." : "Search Weather"}
+        </Button>
 
         {/* Error Alert */}
         {error && (
@@ -211,16 +199,17 @@ export default function Weather({ updateInfo }) {
             sx={{
               mt: 3,
               borderRadius: 2,
-              fontWeight: 500,
-              animation: "shake 0.5s",
-              "@keyframes shake": {
-                "0%, 100%": { transform: "translateX(0)" },
-                "25%": { transform: "translateX(-10px)" },
-                "75%": { transform: "translateX(10px)" },
+              border: "1px solid #fee2e2",
+              backgroundColor: "#fef2f2",
+              "& .MuiAlert-icon": {
+                color: "#dc2626",
+              },
+              "& .MuiAlert-message": {
+                color: "#991b1b",
               },
             }}
           >
-            ⚠️ City not found! Please check the spelling and try again.
+            City not found. Please check the spelling and try again.
           </Alert>
         )}
 
@@ -229,84 +218,22 @@ export default function Weather({ updateInfo }) {
           sx={{
             mt: 4,
             pt: 3,
-            borderTop: "2px solid #f0f0f0",
+            borderTop: "1px solid #e5e7eb",
           }}
         >
           <Typography
-            variant="body2"
+            variant="caption"
             sx={{
+              display: "block",
               textAlign: "center",
-              color: "#999",
-              fontWeight: 500,
+              color: "#9ca3af",
+              lineHeight: 1.6,
             }}
           >
-            💡 Tip: Try searching for major cities or use country codes
+            Tip: You can use country codes for more accuracy
             <br />
             (e.g., "London,UK" or "Paris,FR")
           </Typography>
-        </Box>
-
-        {/* Stats */}
-        <Box
-          sx={{
-            mt: 3,
-            display: "flex",
-            justifyContent: "space-around",
-            flexWrap: "wrap",
-            gap: 2,
-          }}
-        >
-          <Box sx={{ textAlign: "center" }}>
-            <Typography
-              variant="h4"
-              sx={{
-                fontWeight: "bold",
-                background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
-                backgroundClip: "text",
-                WebkitBackgroundClip: "text",
-                WebkitTextFillColor: "transparent",
-              }}
-            >
-              🌤️
-            </Typography>
-            <Typography variant="caption" sx={{ color: "#666", fontWeight: 600 }}>
-              Real-time
-            </Typography>
-          </Box>
-          <Box sx={{ textAlign: "center" }}>
-            <Typography
-              variant="h4"
-              sx={{
-                fontWeight: "bold",
-                background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
-                backgroundClip: "text",
-                WebkitBackgroundClip: "text",
-                WebkitTextFillColor: "transparent",
-              }}
-            >
-              🌍
-            </Typography>
-            <Typography variant="caption" sx={{ color: "#666", fontWeight: 600 }}>
-              Worldwide
-            </Typography>
-          </Box>
-          <Box sx={{ textAlign: "center" }}>
-            <Typography
-              variant="h4"
-              sx={{
-                fontWeight: "bold",
-                background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
-                backgroundClip: "text",
-                WebkitBackgroundClip: "text",
-                WebkitTextFillColor: "transparent",
-              }}
-            >
-              ⚡
-            </Typography>
-            <Typography variant="caption" sx={{ color: "#666", fontWeight: 600 }}>
-              Instant
-            </Typography>
-          </Box>
         </Box>
       </Paper>
     </Box>

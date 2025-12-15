@@ -31,71 +31,34 @@ export default function WeatherApp() {
     <Box
       sx={{
         minHeight: "100vh",
-        background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
+        background: "#f5f7fa",
         position: "relative",
         overflow: "hidden",
       }}
     >
-      {/* Animated Background Elements */}
-      <Box
-        sx={{
-          position: "absolute",
-          top: "10%",
-          left: "5%",
-          width: "300px",
-          height: "300px",
-          borderRadius: "50%",
-          background: "rgba(255, 255, 255, 0.1)",
-          filter: "blur(80px)",
-          animation: "float 6s ease-in-out infinite",
-          "@keyframes float": {
-            "0%, 100%": { transform: "translateY(0px)" },
-            "50%": { transform: "translateY(-30px)" },
-          },
+      <Container 
+        maxWidth="lg" 
+        sx={{ 
+          position: "relative", 
+          zIndex: 1,
+          px: { xs: 2, sm: 3, md: 4 }
         }}
-      />
-      <Box
-        sx={{
-          position: "absolute",
-          bottom: "10%",
-          right: "5%",
-          width: "250px",
-          height: "250px",
-          borderRadius: "50%",
-          background: "rgba(255, 255, 255, 0.1)",
-          filter: "blur(80px)",
-          animation: "float 8s ease-in-out infinite",
-        }}
-      />
-
-      <Container maxWidth="lg" sx={{ position: "relative", zIndex: 1 }}>
+      >
         {/* Header Section */}
         <Box
           sx={{
             textAlign: "center",
-            pt: { xs: 4, sm: 6, md: 8 },
-            pb: { xs: 2, sm: 3 },
+            pt: { xs: 3, sm: 4, md: 6 },
+            pb: { xs: 2, sm: 3, md: 4 },
           }}
         >
           <Typography
             variant="h2"
             sx={{
-              fontWeight: "bold",
-              color: "white",
-              mb: 1,
-              textShadow: "2px 4px 8px rgba(0,0,0,0.2)",
-              fontSize: { xs: "2rem", sm: "2.5rem", md: "3.5rem" },
-              animation: "fadeInDown 0.8s ease-out",
-              "@keyframes fadeInDown": {
-                from: {
-                  opacity: 0,
-                  transform: "translateY(-30px)",
-                },
-                to: {
-                  opacity: 1,
-                  transform: "translateY(0)",
-                },
-              },
+              fontWeight: 700,
+              color: "#1e293b",
+              mb: { xs: 1, sm: 1.5 },
+              fontSize: { xs: "1.75rem", sm: "2.25rem", md: "2.75rem", lg: "3rem" },
             }}
           >
             ⛅ Weather App
@@ -103,24 +66,13 @@ export default function WeatherApp() {
           <Typography
             variant="h6"
             sx={{
-              color: "rgba(255, 255, 255, 0.9)",
+              color: "#64748b",
               fontWeight: 500,
-              textShadow: "1px 2px 4px rgba(0,0,0,0.2)",
-              fontSize: { xs: "0.9rem", sm: "1rem", md: "1.25rem" },
-              animation: "fadeInUp 0.8s ease-out 0.2s both",
-              "@keyframes fadeInUp": {
-                from: {
-                  opacity: 0,
-                  transform: "translateY(20px)",
-                },
-                to: {
-                  opacity: 1,
-                  transform: "translateY(0)",
-                },
-              },
+              fontSize: { xs: "0.875rem", sm: "1rem", md: "1.125rem" },
+              px: { xs: 2, sm: 0 },
             }}
           >
-        
+            Get accurate weather information worldwide
           </Typography>
 
           {/* Feature Tags */}
@@ -128,28 +80,24 @@ export default function WeatherApp() {
             sx={{
               display: "flex",
               justifyContent: "center",
-              gap: 2,
-              mt: 3,
+              gap: { xs: 1, sm: 1.5, md: 2 },
+              mt: { xs: 2, sm: 3 },
               flexWrap: "wrap",
+              px: { xs: 1, sm: 0 },
             }}
           >
-            {["🌡️ Temperature", "💧 Humidity", "💨 Wind Speed"].map((tag, index) => (
+            {["🌡️ Temperature", "💧 Humidity", "💨 Wind Speed"].map((tag) => (
               <Box
                 key={tag}
                 sx={{
-                  backgroundColor: "rgba(255, 255, 255, 0.2)",
-                  backdropFilter: "blur(10px)",
-                  color: "white",
-                  padding: "8px 16px",
+                  backgroundColor: "#e0f2fe",
+                  color: "#0369a1",
+                  padding: { xs: "6px 12px", sm: "8px 16px" },
                   borderRadius: "20px",
-                  fontSize: "0.85rem",
+                  fontSize: { xs: "0.75rem", sm: "0.85rem" },
                   fontWeight: 600,
-                  border: "1px solid rgba(255, 255, 255, 0.3)",
-                  animation: `fadeIn 0.6s ease-out ${index * 0.1}s both`,
-                  "@keyframes fadeIn": {
-                    from: { opacity: 0, transform: "scale(0.8)" },
-                    to: { opacity: 1, transform: "scale(1)" },
-                  },
+                  border: "1px solid #bae6fd",
+                  whiteSpace: "nowrap",
                 }}
               >
                 {tag}
@@ -161,17 +109,7 @@ export default function WeatherApp() {
         {/* Weather Search Component */}
         <Box
           sx={{
-            animation: "slideUp 0.8s ease-out 0.4s both",
-            "@keyframes slideUp": {
-              from: {
-                opacity: 0,
-                transform: "translateY(40px)",
-              },
-              to: {
-                opacity: 1,
-                transform: "translateY(0)",
-              },
-            },
+            mb: { xs: 3, sm: 4 },
           }}
         >
           <Weather updateInfo={updateInfo} />
@@ -181,8 +119,7 @@ export default function WeatherApp() {
         <Fade in={showInfo} timeout={800}>
           <Box
             sx={{
-              mt: 4,
-              pb: { xs: 4, sm: 6 },
+              mb: { xs: 3, sm: 4, md: 5 },
             }}
           >
             <InfoBox info={weatherInfo} />
@@ -193,19 +130,24 @@ export default function WeatherApp() {
         <Box
           sx={{
             textAlign: "center",
-            pb: 4,
-            pt: 2,
+            pb: { xs: 3, sm: 4 },
+            pt: { xs: 2, sm: 3 },
           }}
         >
           <Typography
             variant="body2"
             sx={{
-              color: "rgba(255, 255, 255, 0.8)",
+              color: "#94a3b8",
               fontWeight: 500,
-              fontSize: { xs: "0.75rem", sm: "0.875rem" },
+              fontSize: { xs: "0.7rem", sm: "0.75rem", md: "0.875rem" },
+              px: { xs: 2, sm: 0 },
+              lineHeight: { xs: 1.6, sm: 1.5 },
             }}
           >
-            © 2025 G1 Maher  Weather App | Real-time Weather Data | Powered by OpenWeather API
+            © 2025 G1 Maher Weather App | Real-time Weather Data
+            <Box component="span" sx={{ display: { xs: 'block', sm: 'inline' } }}>
+              {' '}| Powered by OpenWeather API
+            </Box>
           </Typography>
         </Box>
       </Container>
